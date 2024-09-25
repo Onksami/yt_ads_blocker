@@ -1,0 +1,35 @@
+{
+    "manifest_version": 3,
+    "name": "YouTube Ad Blocking",
+    "version": "1.0",
+    "description": "I am preparing it For SFI. no YT ads anymore. Hopefully",
+    "author": "Sami Önk",
+    "permissions": [
+      "tabs",
+      "webRequest",
+      "webRequestBlocking",
+      "declarativeNetRequest",
+      "webRequest",
+      "webRequestBlocking",
+      "**://*.youtube.com/*",
+      "activeTab",
+      "scripting"
+    ],
+    "background": {
+      "service_worker": "background.js"
+    },
+    "content_scripts": [
+      {
+        "matches": ["*://*.youtube.com/*"],
+        "js": ["content.js"]
+      }
+    ],
+    "icons": {
+      "16": "icons/icon.png",
+      "48": "icons/icon.png",
+      "128": "icons/icon.png"
+    },
+    "action": {
+      "default_popup": "popup.html"
+    }
+  }

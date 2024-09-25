@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Ad Skipper</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 10px;
+            width: 200px;
+            background-color: #f4f4f9;
+        }
+
+        h2 {
+            text-align: center;
+            color: #ff0000;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            background-color: #ff0000;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #d40000;
+        }
+
+        .status {
+            text-align: center;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Ad Skipper</h2>
+    <button id="toggle-skipper">Disable Skipper</button>
+    <div class="status">
+        <span id="status-text">Ad Skipper is Enabled</span>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleButton = document.getElementById('toggle-skipper');
+            const statusText = document.getElementById('status-text');
+
+            // Check the current state (enabled or disabled)
+            chrome.storage.local.get('skipperEnabled', (result) => {
+                if (result.skipperEnabled === false) {
+                    toggleButton.textContent = 'Enable Skipper';
+                    statusText.textContent = 'Ad Skipper is Disabled';
+                } else {
+                    toggleButton.textContent = 'Disable Skipper';
+                    statusText.textContent = 'Ad Skipper is Enabled';
+                }
+            });
+
+            // Toggle button functionality
+            toggleButton.addEventListener('click', () => {
+                chrome.storage.local.get('skipperEnabled', (result) => {
+                    const currentState = result.skipperEnabled !== false;
+
+                    if (currentState) {
+                        chrome.storage.local.set({ skipperEnabled: false });
+                        toggleButton.textContent = 'Enable Skipper';
+                        statusText.textContent = 'Ad Skipper is Disabled';
+                    } else {
+                        chrome.storage.local.set({ skipperEnabled: true });
+                        toggleButton.textContent = 'Disable Skipper';
+                        statusText.textContent = 'Ad Skipper is Enabled';
+                    }
+
+                    // Send message to content script to update the ad skipper state
+                    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                        chrome.scripting.executeScript({
+                            target: { tabId: tabs[0].id },
+                            func: (enabled) => {
+                                window.localStorage.setItem('skipperEnabled', enabled);
+                            },
+                            args: [!currentState]
+                        });
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
